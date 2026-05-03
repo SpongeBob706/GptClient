@@ -37,7 +37,7 @@ internal sealed class GptServiceFactory : IGptServiceFactory
     public IGptService Create()
     {
         var logger = _loggerFactory.CreateLogger<RetryHandler>();
-        var gptClientLogger = _loggerFactory.CreateLogger<Client.Impl.GptClient>();
+        var gptClientLogger = _loggerFactory.CreateLogger<Client.Impl.ChatClient>();
         var serviceLogger = _loggerFactory.CreateLogger<GptService>();
 
         // Создаём retry handler
@@ -52,7 +52,7 @@ internal sealed class GptServiceFactory : IGptServiceFactory
         var rateLimiter = new RateLimiter(_options.Value.RequestsPerSecond, logger);
 
         // Создаём GPT клиент
-        var gptClient = new Client.Impl.GptClient(
+        var gptClient = new Client.Impl.ChatClient(
             _httpClientFactory,
             _options.Value.BaseUrl,
             _options.Value.ApiKey,

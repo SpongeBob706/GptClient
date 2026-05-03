@@ -30,6 +30,11 @@ internal sealed class RateLimiter : IAsyncDisposable
         };
 
         _limiter = new SlidingWindowRateLimiter(options);
+
+        _logger.LogDebug(
+            "RateLimiter initialized. RPS: {RequestsPerSecond}, QueueLimit: {QueueLimit}",
+            requestsPerSecond,
+            options.QueueLimit);
     }
 
     /// <summary>
@@ -39,6 +44,7 @@ internal sealed class RateLimiter : IAsyncDisposable
     {
         if (_limiter == null)
         {
+            _logger.LogWarning("Attempt to use disposed RateLimiter");
             throw new ObjectDisposedException(nameof(RateLimiter));
         }
 
@@ -46,16 +52,21 @@ internal sealed class RateLimiter : IAsyncDisposable
 
         if (!lease.IsAcquired)
         {
-            _logger.LogWarning("Не удалось получить разрешение на выполнение запроса. Очередь переполнена.");
-            throw new InvalidOperationException("Очередь rate limiter'а переполнена.");
+            _logger.LogWarning(
+                "Rate limit exceeded. Request rejected due to full queue");
+
+            throw new InvalidOperationException("Rate limiter queue is full");
         }
+
+        _logger.LogTrace("Rate limiter permit acquired");
     }
 
     public async ValueTask DisposeAsync()
     {
         if (_limiter != null)
         {
-            _logger.LogDebug("Освобождение ресурсов RateLimiter");
+            _logger.LogDebug("Disposing RateLimiter");
+
             _limiter.Dispose();
             _limiter = null;
         }

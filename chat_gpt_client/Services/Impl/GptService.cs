@@ -15,18 +15,18 @@ namespace GptClient.Services.Impl;
 /// </summary>
 internal sealed class GptService : IGptService
 {
-    private readonly IGptClient _gptClient;
+    private readonly IChatClient _chatClient;
     private readonly GptClientOptions _options;
     private readonly ILogger _logger;
     private RateLimit? _currentRateLimit;
     private bool _disposed;
 
     public GptService(
-        IGptClient gptClient,
+        IChatClient chatClient,
         IOptions<GptClientOptions> options,
         ILogger<GptService> logger)
     {
-        _gptClient = gptClient;
+        _chatClient = chatClient;
         _options = options.Value;
         _logger = logger;
     }
@@ -47,7 +47,7 @@ internal sealed class GptService : IGptService
 
         _logger.LogInformation("Отправка сообщения в GPT API (модель: {Model})", request.Model);
 
-        var response = await _gptClient.SendChatCompletionAsync(request, cancellationToken);
+        var response = await _chatClient.SendChatCompletionAsync(request, cancellationToken);
 
         // Обновляем текущие лимиты из ответа
         if (response.Usage != null)
@@ -78,7 +78,7 @@ internal sealed class GptService : IGptService
 
         _logger.LogInformation("Отправка сообщения в GPT API со streaming (модель: {Model})", request.Model);
 
-        await foreach (var chunk in _gptClient.StreamChatCompletionAsync(request, cancellationToken)
+        await foreach (var chunk in _chatClient.StreamChatCompletionAsync(request, cancellationToken)
             .ConfigureAwait(false))
         {
             yield return chunk;
@@ -127,9 +127,9 @@ internal sealed class GptService : IGptService
 
         _logger.LogDebug("Освобождение ресурсов GptService");
 
-        if (_gptClient != null)
+        if (_chatClient != null)
         {
-            await _gptClient.DisposeAsync();
+            await _chatClient.DisposeAsync();
         }
 
         GC.SuppressFinalize(this);
