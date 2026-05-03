@@ -28,7 +28,6 @@ public static class JsonConvertExtensions
     public static string ToJsonString<T>(this T value, JsonSerializerOptions? options = null)
     {
         var str = JsonSerializer.Serialize(value, options);
-
         return str;
     }
 }

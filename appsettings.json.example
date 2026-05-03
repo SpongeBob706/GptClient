@@ -1,0 +1,21 @@
+{
+  "GptClient": {
+    "ApiKey": "sk-your-api-key-here",
+    "BaseUrl": "https://api.openai.com/v1",
+    "DefaultModel": "gpt-4",
+    "HttpTimeoutSeconds": 30,
+    "MaxRetryAttempts": 3,
+    "InitialRetryDelayMs": 100,
+    "MaxRetryDelayMs": 10000,
+    "RetryBackoffMultiplier": 2.0,
+    "RequestsPerSecond": 100,
+    "RetryableStatusCodes": [ 408, 429, 500, 502, 503, 504 ]
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "GptClient": "Debug",
+      "Microsoft": "Warning"
+    }
+  }
+}
