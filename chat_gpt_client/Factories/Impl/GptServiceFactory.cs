@@ -1,6 +1,6 @@
 using System;
 using System.Net.Http;
-using GptClient.Client.Impl;
+using GptClient.Core;
 using GptClient.Models;
 using GptClient.Services;
 using GptClient.Services.Impl;
@@ -37,28 +37,6 @@ internal sealed class GptServiceFactory : IGptServiceFactory
     public IGptService Create()
     {
         var logger = _loggerFactory.CreateLogger<RetryHandler>();
-        var gptClientLogger = _loggerFactory.CreateLogger<Client.Impl.ChatClient>();
-        var serviceLogger = _loggerFactory.CreateLogger<GptService>();
-
-        // Создаём retry handler
-        var retryHandler = new RetryHandler(
-            _options.Value.MaxRetryAttempts,
-            _options.Value.InitialRetryDelayMs,
-            _options.Value.MaxRetryDelayMs,
-            _options.Value.RetryBackoffMultiplier,
-            logger);
-
-        // Создаём rate limiter
-        var rateLimiter = new RateLimiter(_options.Value.RequestsPerSecond, logger);
-
-        // Создаём GPT клиент
-        var gptClient = new Client.Impl.ChatClient(
-            _httpClientFactory,
-            _options.Value.BaseUrl,
-            _options.Value.ApiKey,
-            gptClientLogger,
-            retryHandler,
-            rateLimiter);
 
         // Создаём сервис
         return new GptService(gptClient, _options, serviceLogger);

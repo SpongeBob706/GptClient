@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using GptClient.Client.Impl;
+using GptClient.Models;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace GptClient.Core.Impl;
 
@@ -13,9 +15,16 @@ internal sealed class RetryMiddleware : IAiMiddleware
     private readonly RetryHandler _retry;
 
     /// <inheritdoc cref="RetryMiddleware" />
-    public RetryMiddleware(RetryHandler retry)
+    public RetryMiddleware(IOptions<GptClientOptions> options, ILogger<RetryMiddleware> logger)
     {
-        _retry = retry;
+        var opt = options.Value;
+
+        _retry = new RetryHandler(
+            opt.MaxRetryAttempts,
+            opt.InitialRetryDelayMs,
+            opt.MaxRetryDelayMs,
+            opt.RetryBackoffMultiplier,
+            logger);
     }
 
     /// <inheritdoc />

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using GptClient.Exceptions;
 using Microsoft.Extensions.Logging;
 
-namespace GptClient.Client.Impl;
+namespace GptClient.Core;
 
 /// <summary>
 /// Обработчик повторных попыток (retry) с использованием экспоненциальной задержки (exponential backoff)

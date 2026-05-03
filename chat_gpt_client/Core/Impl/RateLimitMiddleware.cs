@@ -2,6 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using GptClient.Client.Impl;
+using GptClient.Models;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace GptClient.Core.Impl;
 
@@ -13,9 +16,9 @@ internal sealed class RateLimitMiddleware : IAiMiddleware
     private readonly RateLimiter _rateLimiter;
 
     /// <inheritdoc cref="RateLimitMiddleware" />
-    public RateLimitMiddleware(RateLimiter rateLimiter)
+    public RateLimitMiddleware(IOptions<GptClientOptions> options, ILogger<RateLimitMiddleware> logger)
     {
-        _rateLimiter = rateLimiter;
+        _rateLimiter = new RateLimiter(options.Value.RequestsPerSecond, logger);
     }
 
     /// <inheritdoc />

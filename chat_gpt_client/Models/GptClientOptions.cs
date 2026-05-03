@@ -21,6 +21,11 @@ public sealed class GptClientOptions
     public required string DefaultModel { get; set; }
 
     /// <summary>
+    /// Модель по умолчанию для изображений (например, gpt-4, gpt-3.5-turbo)
+    /// </summary>
+    public required string DefaultImageModel { get; set; }
+
+    /// <summary>
     /// Таймаут для HTTP запросов в секундах
     /// </summary>
     public int HttpTimeoutSeconds { get; set; } = 30;

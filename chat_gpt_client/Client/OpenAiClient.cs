@@ -1,7 +1,11 @@
 ﻿using System.Threading.Tasks;
 using GptClient.Client.Impl;
+using GptClient.Core;
+using GptClient.Models;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using ChatClient = GptClient.Client.Impl.ChatClient;
+using ImageClient = OpenAI.Images.ImageClient;
 
 namespace GptClient.Client;
 
@@ -12,18 +16,19 @@ internal sealed class OpenAiClient : IOpenAiClient
 {
     /// <inheritdoc cref="OpenAiClient" />
     public OpenAiClient(
-        string apiKey,
-        ILoggerFactory loggerFactory,
-        RetryHandler retryHandler,
-        RateLimiter rateLimiter)
+        IOptions<GptClientOptions> clientOptions,
+        IAiPipeline pipeline,
+        ILoggerFactory loggerFactory
+    )
     {
-        var logger = loggerFactory.CreateLogger("OpenAI");
+        var opt = clientOptions.Value;
+        var chatSdkClient = new OpenAI.Chat.ChatClient(opt.DefaultModel, opt.ApiKey);
 
-        var chatSdkClient = new OpenAI.Chat.ChatClient("gpt-4.1", apiKey);
+        Chat = new ChatClient(chatSdkClient, pipeline);
+        Vision = new VisionClient(chatSdkClient, pipeline, loggerFactory.CreateLogger<VisionClient>());
 
-        Chat = new ChatClient(chatSdkClient);
-        Vision = new VisionClient(chatSdkClient, loggerFactory.CreateLogger<VisionClient>());
-        Images = new ImageClient("gpt-4.1", apiKey, loggerFactory.CreateLogger<ImageClient>());
+        var imageSdkClient = new ImageClient(opt.DefaultImageModel, opt.ApiKey);
+        Images = new Impl.ImageClient(imageSdkClient, pipeline, loggerFactory.CreateLogger<Impl.ImageClient>());
     }
 
     /// <inheritdoc />

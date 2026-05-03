@@ -4,7 +4,7 @@ using System.Threading.RateLimiting;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace GptClient.Client.Impl;
+namespace GptClient.Core;
 
 /// <summary>
 /// Обработчик ограничения скорости (rate limiting) запросов

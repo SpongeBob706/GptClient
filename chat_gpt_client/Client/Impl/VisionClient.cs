@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using GptClient.Core;
 using Microsoft.Extensions.Logging;
 using OpenAI.Chat;
 
@@ -12,12 +13,17 @@ namespace GptClient.Client.Impl;
 internal sealed class VisionClient : IVisionClient
 {
     private readonly OpenAI.Chat.ChatClient _client;
+    private readonly IAiPipeline _pipeline;
     private readonly ILogger _logger;
 
     /// <inheritdoc cref="VisionClient" />
-    public VisionClient(OpenAI.Chat.ChatClient client, ILogger logger)
+    public VisionClient(
+        OpenAI.Chat.ChatClient client,
+        IAiPipeline pipeline,
+        ILogger logger)
     {
         _client = client;
+        _pipeline = pipeline;
         _logger = logger;
     }
 
@@ -40,7 +46,21 @@ internal sealed class VisionClient : IVisionClient
             "Analyzing image from bytes. Prompt length: {Length}",
             prompt.Length);
 
-        return await _client.CompleteChatAsync(messages, cancellationToken: cancellationToken);
+        return await _pipeline.ExecuteAsync<ChatCompletion>(
+            new AiContext
+            {
+                OperationName = "AnalyzeImage",
+                Request = messages
+            },
+            async (ctx, ct) =>
+            {
+                var req = (ChatMessage[])ctx.Request!;
+
+                var result = await _client.CompleteChatAsync(messages, cancellationToken: ct);
+
+                return result;
+            },
+            cancellationToken);
     }
 
     /// <inheritdoc />
@@ -59,6 +79,20 @@ internal sealed class VisionClient : IVisionClient
 
         _logger.LogDebug("Analyzing image from URL: {Url}", imageUrl);
 
-        return await _client.CompleteChatAsync(messages, cancellationToken: cancellationToken);
+        return await _pipeline.ExecuteAsync<ChatCompletion>(
+            new AiContext
+            {
+                OperationName = "AnalyzeImageFromUrl",
+                Request = messages
+            },
+            async (ctx, ct) =>
+            {
+                var req = (ChatMessage[])ctx.Request!;
+
+                var result = await _client.CompleteChatAsync(messages, cancellationToken: ct);
+
+                return result;
+            },
+            cancellationToken);
     }
 }

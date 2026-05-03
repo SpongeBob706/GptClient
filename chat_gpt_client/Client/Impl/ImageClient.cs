@@ -1,5 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using GptClient.Core;
 using Microsoft.Extensions.Logging;
 
 namespace GptClient.Client.Impl;
@@ -10,12 +11,17 @@ namespace GptClient.Client.Impl;
 internal sealed class ImageClient : IImageClient
 {
     private readonly OpenAI.Images.ImageClient _client;
+    private readonly IAiPipeline _pipeline;
     private readonly ILogger _logger;
 
     /// <inheritdoc cref="ImageClient" />
-    public ImageClient(string model, string apiKey, ILogger logger)
+    public ImageClient(
+        OpenAI.Images.ImageClient client,
+        IAiPipeline pipeline,
+        ILogger logger)
     {
-        _client = new OpenAI.Images.ImageClient(model: model, apiKey: apiKey);
+        _client = client;
+        _pipeline = pipeline;
         _logger = logger;
     }
 
@@ -28,10 +34,22 @@ internal sealed class ImageClient : IImageClient
             "Generating image. Prompt length: {Length}",
             prompt.Length);
 
-        var result = await _client.GenerateImageAsync(
-            prompt,
-            cancellationToken: cancellationToken);
+        return await _pipeline.ExecuteAsync<string>(
+            new AiContext
+            {
+                OperationName = "ImageGenerating",
+                Request = prompt
+            },
+            async (ctx, ct) =>
+            {
+                var req = (string)ctx.Request!;
 
-        return result.Value.ImageUri.ToString();
+                var result = await _client.GenerateImageAsync(
+                    req,
+                    cancellationToken: ct);
+
+                return result.Value.ImageUri.ToString();
+            },
+            cancellationToken);
     }
 }

@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using GptClient.Client;
+using GptClient.Core;
+using GptClient.Core.Impl;
 using GptClient.Factories;
 using GptClient.Factories.Impl;
 using GptClient.Models;
@@ -41,6 +44,9 @@ public static class ServiceCollectionExtensions
 
         AddHttpClient(services);
 
+        // регистрируем клиенты и пайплайн обрабработки запросов до openAi
+        AddAiClient(services);
+
         // Регистрируем фабрику сервиса
         services.AddSingleton<IGptServiceFactory, GptServiceFactory>();
 
@@ -77,6 +83,9 @@ public static class ServiceCollectionExtensions
 
         AddHttpClient(services);
 
+        // регистрируем клиенты и пайплайн обрабработки запросов до openAi
+        AddAiClient(services);
+
         // Регистрируем фабрику сервиса
         services.AddSingleton<IGptServiceFactory, GptServiceFactory>();
 
@@ -99,4 +108,15 @@ public static class ServiceCollectionExtensions
         }
     }
 
+    private static void AddAiClient(IServiceCollection services)
+    {
+        services.AddSingleton<IOpenAiClient, OpenAiClient>();
+
+        services.AddSingleton<IAiPipeline, AiPipeline>();
+
+        // порядок регистрации важен
+        services.AddSingleton<IAiMiddleware, LoggingMiddleware>();
+        services.AddSingleton<IAiMiddleware, RateLimitMiddleware>();
+        services.AddSingleton<IAiMiddleware, RetryMiddleware>();
+    }
 }
