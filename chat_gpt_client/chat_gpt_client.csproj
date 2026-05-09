@@ -5,22 +5,27 @@
         <ImplicitUsings>disable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>GptClient</RootNamespace>
+        <AssemblyName>GptClient</AssemblyName>
+        <OutputType>Library</OutputType>
 
         <PackageId>MyBestGptClient</PackageId>
         <Version>1.0.0</Version>
+        <Authors>SpongeBob706</Authors>
         <Description>My awesome gpt client library</Description>
+        <PackageTags>openai;gpt;chat;ai</PackageTags>
         <PackageProjectUrl>https://github.com/SpongeBob706/GptClient.git</PackageProjectUrl>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="OpenAI" Version="2.0.0" />
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.7" />
-      <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.7" />
-      <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.7" />
-      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.7" />
-      <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.7" />
-      <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.7" />
-      <PackageReference Include="System.Threading.RateLimiting" Version="10.0.7" />
+        <PackageReference Include="OpenAI" Version="2.0.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.7" />
+        <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.7" />
+        <PackageReference Include="System.Threading.RateLimiting" Version="10.0.7" />
     </ItemGroup>
 
 </Project>
