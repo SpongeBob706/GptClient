@@ -108,8 +108,7 @@ internal sealed class GptService : IGptService
             messages,
             operationName: "text transformation",
             cancellationToken,
-            responseFormat: responseFormat,
-            temperature: 0.3f);
+            responseFormat: responseFormat);
     }
 
     /// <inheritdoc />
@@ -150,8 +149,7 @@ internal sealed class GptService : IGptService
             messages,
             operationName: "text transformation with image context",
             cancellationToken,
-            responseFormat: responseFormat,
-            temperature: 0.3f);
+            responseFormat: responseFormat);
     }
 
     #endregion
@@ -263,14 +261,11 @@ internal sealed class GptService : IGptService
         List<ChatMessage> messages,
         string operationName,
         CancellationToken cancellationToken,
-        float? temperature = null,
         ChatResponseFormat? responseFormat = null)
     {
         try
         {
-            var options = temperature.HasValue
-                ? new ChatCompletionOptions { Temperature = temperature.Value, ResponseFormat = responseFormat }
-                : new ChatCompletionOptions();
+            var options = new ChatCompletionOptions { ResponseFormat = responseFormat };
 
             var completion = await _openAiClient.Chat.CompleteAsync(messages, options, cancellationToken);
             var result = completion.Content[0].Text;
