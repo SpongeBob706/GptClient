@@ -116,7 +116,7 @@ public static class ServiceCollectionExtensions
 
         // порядок регистрации важен
         services.AddSingleton<IAiMiddleware, LoggingMiddleware>();
-        services.AddSingleton<IAiMiddleware, RateLimitMiddleware>();
         services.AddSingleton<IAiMiddleware, RetryMiddleware>();
+        services.AddSingleton<IAiMiddleware, RateLimitMiddleware>();
     }
 }

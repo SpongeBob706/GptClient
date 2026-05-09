@@ -1,11 +1,7 @@
-using System;
-using System.Net.Http;
-using GptClient.Core;
-using GptClient.Models;
+using GptClient.Client;
 using GptClient.Services;
 using GptClient.Services.Impl;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace GptClient.Factories.Impl;
 
@@ -14,20 +10,15 @@ namespace GptClient.Factories.Impl;
 /// </summary>
 internal sealed class GptServiceFactory : IGptServiceFactory
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IOptions<GptClientOptions> _options;
+    private readonly IOpenAiClient _openAiClient;
     private readonly ILoggerFactory _loggerFactory;
 
+    /// <inheritdoc cref="GptServiceFactory" />
     public GptServiceFactory(
-        IServiceProvider serviceProvider,
-        IHttpClientFactory httpClientFactory,
-        IOptions<GptClientOptions> options,
+        IOpenAiClient openAiClient,
         ILoggerFactory loggerFactory)
     {
-        _serviceProvider = serviceProvider;
-        _httpClientFactory = httpClientFactory;
-        _options = options;
+        _openAiClient = openAiClient;
         _loggerFactory = loggerFactory;
     }
 
@@ -36,9 +27,8 @@ internal sealed class GptServiceFactory : IGptServiceFactory
     /// </summary>
     public IGptService Create()
     {
-        var logger = _loggerFactory.CreateLogger<RetryHandler>();
+        var logger = _loggerFactory.CreateLogger<GptService>();
 
-        // Создаём сервис
-        return new GptService(gptClient, _options, serviceLogger);
+        return new GptService(_openAiClient, logger);
     }
 }
