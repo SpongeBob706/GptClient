@@ -11,19 +11,17 @@ public sealed class GptClientOptions
     public required string ApiKey { get; set; }
 
     /// <summary>
-    /// Базовый URL API (например, https://api.openai.com/v1)
+    /// Модель по умолчанию (например, gpt-5.5)
     /// </summary>
-    public required string BaseUrl { get; set; }
+    public required string DefaultModel { get; set; } = "gpt-5.5";
 
     /// <summary>
-    /// Модель по умолчанию (например, gpt-4, gpt-3.5-turbo)
+    /// Модель по умолчанию для изображений (например, gpt-image-2)
     /// </summary>
-    public required string DefaultModel { get; set; }
-
-    /// <summary>
-    /// Модель по умолчанию для изображений (например, gpt-4, gpt-3.5-turbo)
-    /// </summary>
-    public required string DefaultImageModel { get; set; }
+    /// <remarks>
+    /// https://developers.openai.com/api/docs/guides/tools-image-generation#supported-models
+    /// </remarks>
+    public required string DefaultImageModel { get; set; } = "gpt-image-2";
 
     /// <summary>
     /// Таймаут для HTTP запросов в секундах
@@ -54,4 +52,24 @@ public sealed class GptClientOptions
     /// Максимальное количество запросов в секунду (для rate limiting)
     /// </summary>
     public int RequestsPerSecond { get; set; } = 100;
+
+    /// <summary>
+    /// Адрес прокси-сервера (например, http://proxy.company.com:8080)
+    /// </summary>
+    public string? ProxyAddress { get; set; }
+
+    /// <summary>
+    /// Имя пользователя для аутентификации прокси
+    /// </summary>
+    public string? ProxyUsername { get; set; }
+
+    /// <summary>
+    /// Пароль для аутентификации прокси
+    /// </summary>
+    public string? ProxyPassword { get; set; }
+
+    /// <summary>
+    /// Обходить прокси для локальных адресов
+    /// </summary>
+    public bool ProxyBypassLocal { get; set; } = true;
 }

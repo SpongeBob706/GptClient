@@ -4,6 +4,7 @@ using GptClient.Core;
 using GptClient.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using OpenAI;
 using ChatClient = GptClient.Client.Impl.ChatClient;
 using ImageClient = OpenAI.Images.ImageClient;
 

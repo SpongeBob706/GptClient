@@ -16,7 +16,6 @@ namespace GptClient.Examples;
 public static class UsageExamples
 {
     private const string ApiKey = "sk-your-api-key-here";
-    private const string BaseUrl = "https://api.openai.com/v1";
     private const string DefaultModel = "gpt-4";
     private const string DefaultImageModel = "gpt-4";
 
@@ -31,7 +30,6 @@ public static class UsageExamples
         services.AddGptClient(options =>
         {
             options.ApiKey = ApiKey;
-            options.BaseUrl = BaseUrl;
             options.DefaultModel = DefaultModel;
             options.HttpTimeoutSeconds = 30;
             options.MaxRetryAttempts = 3;
@@ -68,7 +66,6 @@ public static class UsageExamples
         services.AddGptClient(options =>
         {
             options.ApiKey = ApiKey;
-            options.BaseUrl = BaseUrl;
             options.DefaultModel = DefaultModel;
         });
 
@@ -104,7 +101,6 @@ public static class UsageExamples
         services.AddGptClient(options =>
         {
             options.ApiKey = ApiKey;
-            options.BaseUrl = BaseUrl;
             options.DefaultModel = DefaultModel;
         });
 
@@ -144,7 +140,6 @@ public static class UsageExamples
         services.AddGptClient(options =>
         {
             options.ApiKey = ApiKey;
-            options.BaseUrl = BaseUrl;
             options.DefaultModel = DefaultModel;
         });
 
@@ -184,7 +179,6 @@ public static class UsageExamples
         services.AddGptClient(options =>
         {
             options.ApiKey = ApiKey;
-            options.BaseUrl = BaseUrl;
             options.DefaultModel = DefaultModel;
             options.DefaultImageModel = DefaultImageModel;
         });
@@ -218,7 +212,6 @@ public static class UsageExamples
         services.AddGptClient(options =>
         {
             options.ApiKey = ApiKey;
-            options.BaseUrl = BaseUrl;
             options.DefaultModel = DefaultModel;
             options.DefaultImageModel = DefaultImageModel;
         });
@@ -257,7 +250,6 @@ public static class UsageExamples
         services.AddGptClient(options =>
         {
             options.ApiKey = ApiKey;
-            options.BaseUrl = BaseUrl;
             options.DefaultModel = DefaultModel;
             options.DefaultImageModel = DefaultImageModel;
         });
@@ -294,7 +286,6 @@ public static class UsageExamples
         services.AddGptClient(options =>
         {
             options.ApiKey = ApiKey;
-            options.BaseUrl = BaseUrl;
             options.DefaultModel = DefaultModel;
             options.DefaultImageModel = DefaultImageModel;
         });
@@ -336,7 +327,6 @@ public static class UsageExamples
         services.AddGptClient(options =>
         {
             options.ApiKey = ApiKey;
-            options.BaseUrl = BaseUrl;
             options.DefaultModel = "gpt-3.5-turbo";
             options.DefaultImageModel = DefaultImageModel;
         });
@@ -381,7 +371,6 @@ public static class UsageExamples
         services.AddGptClient(options =>
         {
             options.ApiKey = "sk-invalid-key";  // Неверный ключ для демонстрации
-            options.BaseUrl = BaseUrl;
             options.DefaultModel = DefaultModel;
             options.MaxRetryAttempts = 2;
         });

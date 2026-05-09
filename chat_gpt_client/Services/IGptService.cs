@@ -16,11 +16,13 @@ public interface IGptService : IAsyncDisposable
     /// </summary>
     /// <param name="prompt">Текстовый запрос</param>
     /// <param name="systemMessage">Системное сообщение (роль, контекст)</param>
+    /// <param name="responseFormat">Формат ответа</param>
     /// <param name="cancellationToken">Токен отмены</param>
     /// <returns>Сгенерированный текст</returns>
     Task<string> GenerateTextAsync(
         string prompt,
         string? systemMessage = null,
+        ChatResponseFormat? responseFormat = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -28,21 +30,25 @@ public interface IGptService : IAsyncDisposable
     /// </summary>
     /// <param name="text">Исходный текст для изменения</param>
     /// <param name="instruction">Инструкция по изменению</param>
+    /// <param name="responseFormat">Формат ответа</param>
     /// <param name="cancellationToken">Токен отмены</param>
     /// <returns>Изменённый текст</returns>
     Task<string> TransformTextAsync(
         string text,
         string instruction,
+        ChatResponseFormat? responseFormat = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Продолжить диалог с историей сообщений
     /// </summary>
     /// <param name="messages">История сообщений</param>
+    /// <param name="responseFormat">Формат ответа</param>
     /// <param name="cancellationToken">Токен отмены</param>
     /// <returns>Ответ ассистента</returns>
     Task<string> ContinueDialogueAsync(
         IEnumerable<ChatMessage> messages,
+        ChatResponseFormat? responseFormat = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -110,11 +116,13 @@ public interface IGptService : IAsyncDisposable
     /// <param name="text">Исходный текст</param>
     /// <param name="imageBytes">Изображение для контекста</param>
     /// <param name="instruction">Инструкция по изменению текста с учётом изображения</param>
+    /// <param name="responseFormat">Формат ответа</param>
     /// <param name="cancellationToken">Токен отмены</param>
     /// <returns>Изменённый текст</returns>
     Task<string> TransformTextWithImageContextAsync(
         string text,
         byte[] imageBytes,
         string instruction,
+        ChatResponseFormat? responseFormat = null,
         CancellationToken cancellationToken = default);
 }

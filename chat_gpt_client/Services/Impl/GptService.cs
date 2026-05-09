@@ -42,6 +42,7 @@ internal sealed class GptService : IGptService
     public async Task<string> GenerateTextAsync(
         string prompt,
         string? systemMessage = null,
+        ChatResponseFormat? responseFormat = null,
         CancellationToken cancellationToken = default)
     {
         ValidateInput(prompt);
@@ -49,7 +50,11 @@ internal sealed class GptService : IGptService
         LogOperationStarted("Text generation", ("PromptLength", prompt.Length));
 
         var messages = BuildMessages(prompt, systemMessage);
-        return await ExecuteChatCompletionAsync(messages, "text generation", cancellationToken);
+        return await ExecuteChatCompletionAsync(
+            messages,
+            operationName: "text generation",
+            responseFormat: responseFormat,
+            cancellationToken: cancellationToken);
     }
 
     /// <inheritdoc />
@@ -80,6 +85,7 @@ internal sealed class GptService : IGptService
     public async Task<string> TransformTextAsync(
         string text,
         string instruction,
+        ChatResponseFormat? responseFormat = null,
         CancellationToken cancellationToken = default)
     {
         ValidateInput(text, nameof(text));
@@ -100,8 +106,9 @@ internal sealed class GptService : IGptService
 
         return await ExecuteChatCompletionAsync(
             messages,
-            "text transformation",
+            operationName: "text transformation",
             cancellationToken,
+            responseFormat: responseFormat,
             temperature: 0.3f);
     }
 
@@ -110,6 +117,7 @@ internal sealed class GptService : IGptService
         string text,
         byte[] imageBytes,
         string instruction,
+        ChatResponseFormat? responseFormat = null,
         CancellationToken cancellationToken = default)
     {
         ValidateInput(text, nameof(text));
@@ -140,8 +148,9 @@ internal sealed class GptService : IGptService
 
         return await ExecuteChatCompletionAsync(
             messages,
-            "text transformation with image context",
+            operationName: "text transformation with image context",
             cancellationToken,
+            responseFormat: responseFormat,
             temperature: 0.3f);
     }
 
@@ -152,6 +161,7 @@ internal sealed class GptService : IGptService
     /// <inheritdoc />
     public async Task<string> ContinueDialogueAsync(
         IEnumerable<ChatMessage> messages,
+        ChatResponseFormat? responseFormat = null,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(messages);
@@ -162,7 +172,11 @@ internal sealed class GptService : IGptService
 
         LogOperationStarted("Dialogue continuation", ("MessageCount", messagesList.Count));
 
-        return await ExecuteChatCompletionAsync(messagesList, "dialogue continuation", cancellationToken);
+        return await ExecuteChatCompletionAsync(
+            messagesList,
+            operationName: "dialogue continuation",
+            responseFormat: responseFormat,
+            cancellationToken: cancellationToken);
     }
 
     #endregion
@@ -249,12 +263,13 @@ internal sealed class GptService : IGptService
         List<ChatMessage> messages,
         string operationName,
         CancellationToken cancellationToken,
-        float? temperature = null)
+        float? temperature = null,
+        ChatResponseFormat? responseFormat = null)
     {
         try
         {
             var options = temperature.HasValue
-                ? new ChatCompletionOptions { Temperature = temperature.Value }
+                ? new ChatCompletionOptions { Temperature = temperature.Value, ResponseFormat = responseFormat }
                 : new ChatCompletionOptions();
 
             var completion = await _openAiClient.Chat.CompleteAsync(messages, options, cancellationToken);

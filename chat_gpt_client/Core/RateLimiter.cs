@@ -24,6 +24,7 @@ internal sealed class RateLimiter : IAsyncDisposable
         {
             AutoReplenishment = true,
             QueueLimit = requestsPerSecond * 2,
+            SegmentsPerWindow = Math.Max(1, requestsPerSecond / 4), // Добавлено! Минимум 1
             QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
             PermitLimit = requestsPerSecond,
             Window = TimeSpan.FromSeconds(1)
@@ -32,9 +33,10 @@ internal sealed class RateLimiter : IAsyncDisposable
         _limiter = new SlidingWindowRateLimiter(options);
 
         _logger.LogDebug(
-            "RateLimiter initialized. RPS: {RequestsPerSecond}, QueueLimit: {QueueLimit}",
+            "RateLimiter initialized. RPS: {RequestsPerSecond}, QueueLimit: {QueueLimit}, SegmentsPerWindow: {SegmentsPerWindow}",
             requestsPerSecond,
-            options.QueueLimit);
+            options.QueueLimit,
+            options.SegmentsPerWindow);
     }
 
     /// <summary>

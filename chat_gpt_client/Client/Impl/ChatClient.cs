@@ -34,7 +34,7 @@ internal sealed class ChatClient : IChatClient
             new AiContext
             {
                 OperationName = "ChatCompletion",
-                Request = new ChatExecutionRequest(messages, options)
+                Request = new ChatExecutionRequest(messages, options),
             },
             async (ctx, ct) =>
             {
