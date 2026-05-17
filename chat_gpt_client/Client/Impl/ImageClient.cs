@@ -29,7 +29,7 @@ internal sealed class ImageClient : IImageClient
     }
 
     /// <inheritdoc />
-    public async Task<string> GenerateAsync(
+    public async Task<byte[]> GenerateAsync(
         string prompt,
         CancellationToken cancellationToken = default)
     {
@@ -37,7 +37,7 @@ internal sealed class ImageClient : IImageClient
             "Generating image. Prompt length: {Length}",
             prompt.Length);
 
-        return await _pipeline.ExecuteAsync<string>(
+        return await _pipeline.ExecuteAsync<byte[]>(
             new AiContext
             {
                 OperationName = "ImageGenerating",
@@ -47,26 +47,12 @@ internal sealed class ImageClient : IImageClient
             {
                 var req = (string)ctx.Request!;
 
-                GeneratedImage image;
-
                 var result = await _client.GenerateImageAsync(
                     req,
                     new ImageGenerationOptions(),
                     cancellationToken: ct);
 
-                image = result.Value;
-
-                if (image.ImageUri is not null)
-                {
-                    return image.ImageUri.ToString();
-                }
-
-                if (image.ImageBytes is not null)
-                {
-                    return Convert.ToBase64String(image.ImageBytes.ToArray());
-                }
-
-                throw new InvalidOperationException("Image generation returned neither URI nor bytes");
+                return result.Value.ImageBytes.ToArray();
             },
             cancellationToken);
     }

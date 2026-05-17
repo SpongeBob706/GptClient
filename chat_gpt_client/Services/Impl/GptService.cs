@@ -182,7 +182,7 @@ internal sealed class GptService : IGptService
     #region Image Operations
 
     /// <inheritdoc />
-    public async Task<string> EditImageAsync(
+    public async Task<byte[]> EditImageAsync(
         byte[] imageBytes,
         string editPrompt,
         CancellationToken cancellationToken = default)
@@ -204,7 +204,7 @@ internal sealed class GptService : IGptService
     }
 
     /// <inheritdoc />
-    public async Task<string> EditImageFromUrlAsync(
+    public async Task<byte[]> EditImageFromUrlAsync(
         Uri imageUrl,
         string editPrompt,
         CancellationToken cancellationToken = default)
@@ -242,7 +242,7 @@ internal sealed class GptService : IGptService
     }
 
     /// <inheritdoc />
-    public async Task<string> GenerateImageAsync(
+    public async Task<byte[]> GenerateImageAsync(
         string prompt,
         CancellationToken cancellationToken = default)
     {
@@ -355,13 +355,13 @@ internal sealed class GptService : IGptService
         }
     }
 
-    private async Task<string> ExecuteImageGenerationAsync(string prompt, CancellationToken cancellationToken)
+    private async Task<byte[]> ExecuteImageGenerationAsync(string prompt, CancellationToken cancellationToken)
     {
         try
         {
-            var imageUrl = await _openAiClient.Images.GenerateAsync(prompt, cancellationToken);
-            LogOperationCompleted("image generation", ("ImageUrl", imageUrl));
-            return imageUrl;
+            var imageBytes = await _openAiClient.Images.GenerateAsync(prompt, cancellationToken);
+            LogOperationCompleted("image generation");
+            return imageBytes;
         }
         catch (OperationCanceledException)
         {

@@ -71,7 +71,7 @@ public interface IGptService : IAsyncDisposable
     /// <param name="editPrompt">Промпт с описанием желаемых изменений</param>
     /// <param name="cancellationToken">Токен отмены</param>
     /// <returns>URL сгенерированного изображения</returns>
-    Task<string> EditImageAsync(
+    Task<byte[]> EditImageAsync(
         byte[] imageBytes,
         string editPrompt,
         CancellationToken cancellationToken = default);
@@ -83,7 +83,7 @@ public interface IGptService : IAsyncDisposable
     /// <param name="editPrompt">Промпт с описанием желаемых изменений</param>
     /// <param name="cancellationToken">Токен отмены</param>
     /// <returns>URL сгенерированного изображения</returns>
-    Task<string> EditImageFromUrlAsync(
+    Task<byte[]> EditImageFromUrlAsync(
         Uri imageUrl,
         string editPrompt,
         CancellationToken cancellationToken = default);
@@ -106,7 +106,7 @@ public interface IGptService : IAsyncDisposable
     /// <param name="prompt">Описание желаемого изображения</param>
     /// <param name="cancellationToken">Токен отмены</param>
     /// <returns>URL сгенерированного изображения</returns>
-    Task<string> GenerateImageAsync(
+    Task<byte[]> GenerateImageAsync(
         string prompt,
         CancellationToken cancellationToken = default);
 

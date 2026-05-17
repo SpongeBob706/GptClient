@@ -11,7 +11,7 @@ public interface IImageClient
     /// <summary>
     /// Сгенерировать изображение по текстовому описанию
     /// </summary>
-    Task<string> GenerateAsync(
+    Task<byte[]> GenerateAsync(
         string prompt,
         CancellationToken cancellationToken = default);
 }
