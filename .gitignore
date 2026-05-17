@@ -16,5 +16,6 @@ password.sh
 scripts/deploy/data
 .DS_Store
 *.tar
+*.env
 *.tar.gz
 /BrokerAssistBot/Properties/launchSettings.json

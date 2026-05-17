@@ -1,7 +1,10 @@
-﻿using System.Threading;
+﻿using System;
+using System.ClientModel;
+using System.Threading;
 using System.Threading.Tasks;
 using GptClient.Core;
 using Microsoft.Extensions.Logging;
+using OpenAI.Images;
 
 namespace GptClient.Client.Impl;
 
@@ -44,11 +47,26 @@ internal sealed class ImageClient : IImageClient
             {
                 var req = (string)ctx.Request!;
 
+                GeneratedImage image;
+
                 var result = await _client.GenerateImageAsync(
                     req,
+                    new ImageGenerationOptions(),
                     cancellationToken: ct);
 
-                return result.Value.ImageUri.ToString();
+                image = result.Value;
+
+                if (image.ImageUri is not null)
+                {
+                    return image.ImageUri.ToString();
+                }
+
+                if (image.ImageBytes is not null)
+                {
+                    return Convert.ToBase64String(image.ImageBytes.ToArray());
+                }
+
+                throw new InvalidOperationException("Image generation returned neither URI nor bytes");
             },
             cancellationToken);
     }
