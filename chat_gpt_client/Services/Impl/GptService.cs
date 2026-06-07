@@ -5,8 +5,10 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using GptClient.Client;
+using GptClient.Models;
 using Microsoft.Extensions.Logging;
 using OpenAI.Chat;
+using OpenAI.Images;
 
 namespace GptClient.Services.Impl;
 
@@ -36,6 +38,65 @@ internal sealed class GptService : IGptService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
+    #region Responses
+
+    /// <inheritdoc />
+    public async Task<ResponseExecutionResult> ExecuteResponseAsync(
+        ResponseRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        LogOperationStarted(
+            "Responses API",
+            ("SessionId", request.SessionId));
+
+        try
+        {
+            var result = await _openAiClient.ResponseImageClient.ExecuteAsync(
+                request,
+                cancellationToken);
+
+            LogOperationCompleted(
+                "Responses API",
+                ("ResponseId", result.ResponseId));
+
+            return result;
+        }
+        catch (OperationCanceledException)
+        {
+            LogOperationCancelled("Responses API");
+            throw;
+        }
+        catch (Exception ex)
+        {
+            LogOperationFailed("Responses API", ex);
+            throw;
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task<ResponseExecutionResult> ContinueResponseAsync(
+        string sessionId,
+        string prompt,
+        IReadOnlyCollection<ResponseImage>? images = null,
+        CancellationToken cancellationToken = default)
+    {
+        ValidateInput(prompt);
+
+        return await ExecuteResponseAsync(
+            new ResponseRequest
+            {
+                SessionId = sessionId,
+                Prompt = prompt,
+                ContinueConversation = true,
+                Images = images ?? Array.Empty<ResponseImage>()
+            },
+            cancellationToken);
+    }
+
+  #endregion
+
     #region Text Generation
 
     /// <inheritdoc />
@@ -50,11 +111,13 @@ internal sealed class GptService : IGptService
         LogOperationStarted("Text generation", ("PromptLength", prompt.Length));
 
         var messages = BuildMessages(prompt, systemMessage);
-        return await ExecuteChatCompletionAsync(
+        var completion = await ExecuteChatCompletionAsync(
             messages,
             operationName: "text generation",
             responseFormat: responseFormat,
             cancellationToken: cancellationToken);
+
+        return ExtractText(completion);
     }
 
     /// <inheritdoc />
@@ -104,11 +167,13 @@ internal sealed class GptService : IGptService
                 "Transformed text:")
         };
 
-        return await ExecuteChatCompletionAsync(
+        var completion = await ExecuteChatCompletionAsync(
             messages,
             operationName: "text transformation",
             cancellationToken,
             responseFormat: responseFormat);
+
+        return ExtractText(completion);
     }
 
     /// <inheritdoc />
@@ -145,11 +210,13 @@ internal sealed class GptService : IGptService
                 "Transformed text:")
         };
 
-        return await ExecuteChatCompletionAsync(
+        var completion = await ExecuteChatCompletionAsync(
             messages,
             operationName: "text transformation with image context",
             cancellationToken,
             responseFormat: responseFormat);
+
+        return ExtractText(completion);
     }
 
     #endregion
@@ -170,9 +237,34 @@ internal sealed class GptService : IGptService
 
         LogOperationStarted("Dialogue continuation", ("MessageCount", messagesList.Count));
 
-        return await ExecuteChatCompletionAsync(
+        var completion = await ExecuteChatCompletionAsync(
             messagesList,
             operationName: "dialogue continuation",
+            responseFormat: responseFormat,
+            cancellationToken: cancellationToken);
+
+        return ExtractText(completion);
+    }
+
+    /// <summary>
+    /// Продолжает диалог и возвращает полный ChatCompletion с возможными изображениями
+    /// </summary>
+    public async Task<ChatCompletion> ContinueDialogueWithImagesAsync(
+        IEnumerable<ChatMessage> messages,
+        ChatResponseFormat? responseFormat = null,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(messages);
+
+        var messagesList = messages.ToList();
+        if (messagesList.Count == 0)
+            throw new ArgumentException("Список сообщений не может быть пустым", nameof(messages));
+
+        LogOperationStarted("Dialogue continuation with images", ("MessageCount", messagesList.Count));
+
+        return await ExecuteChatCompletionAsync(
+            messagesList,
+            operationName: "dialogue continuation with images",
             responseFormat: responseFormat,
             cancellationToken: cancellationToken);
     }
@@ -182,7 +274,7 @@ internal sealed class GptService : IGptService
     #region Image Operations
 
     /// <inheritdoc />
-    public async Task<byte[]> EditImageAsync(
+    public async Task<byte[]> EditImageWithAnalyseAsync(
         byte[] imageBytes,
         string editPrompt,
         CancellationToken cancellationToken = default)
@@ -201,6 +293,52 @@ internal sealed class GptService : IGptService
         var generationPrompt = BuildImageEditPrompt(description, editPrompt);
 
         return await ExecuteImageGenerationAsync(generationPrompt, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<byte[]> EditImageDirectAsync(
+        byte[] imageBytes,
+        string editPrompt,
+        GeneratedImageQuality? quality = null,
+        GeneratedImageSize? size = null,
+        CancellationToken cancellationToken = default)
+    {
+        ValidateImageBytes(imageBytes);
+        ValidateInput(editPrompt, nameof(editPrompt));
+
+        LogOperationStarted(
+            "Direct image editing",
+            ("ImageSize", imageBytes.Length),
+            ("EditPrompt", editPrompt));
+
+        try
+        {
+            var result = await _openAiClient.Images.EditAsync(
+                imageBytes,
+                editPrompt,
+                quality,
+                size,
+                cancellationToken);
+
+            LogOperationCompleted("Direct image editing");
+
+            return result;
+        }
+        catch (OperationCanceledException)
+        {
+            LogOperationCancelled(
+                "direct image editing");
+
+            throw;
+        }
+        catch (Exception ex)
+        {
+            LogOperationFailed(
+                "direct image editing",
+                ex);
+
+            throw;
+        }
     }
 
     /// <inheritdoc />
@@ -257,7 +395,7 @@ internal sealed class GptService : IGptService
 
     #region Core Execution Methods
 
-    private async Task<string> ExecuteChatCompletionAsync(
+    private async Task<ChatCompletion> ExecuteChatCompletionAsync(
         List<ChatMessage> messages,
         string operationName,
         CancellationToken cancellationToken,
@@ -268,10 +406,9 @@ internal sealed class GptService : IGptService
             var options = new ChatCompletionOptions { ResponseFormat = responseFormat };
 
             var completion = await _openAiClient.Chat.CompleteAsync(messages, options, cancellationToken);
-            var result = completion.Content[0].Text;
 
-            LogOperationCompleted(operationName, ("ResponseLength", result.Length));
-            return result;
+            LogOperationCompleted(operationName, ("ResponseLength", completion.Content[0].Text.Length));
+            return completion;
         }
         catch (OperationCanceledException)
         {
@@ -283,6 +420,14 @@ internal sealed class GptService : IGptService
             LogOperationFailed(operationName, ex);
             throw;
         }
+    }
+
+    /// <summary>
+    /// Извлекает текст из ChatCompletion
+    /// </summary>
+    private static string ExtractText(ChatCompletion completion)
+    {
+        return completion.Content[0].Text;
     }
 
     private async IAsyncEnumerable<string> ExecuteStreamingAsync(

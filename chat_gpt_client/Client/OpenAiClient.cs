@@ -4,7 +4,7 @@ using GptClient.Core;
 using GptClient.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using OpenAI;
+using OpenAI.Responses;
 using ChatClient = GptClient.Client.Impl.ChatClient;
 using ImageClient = OpenAI.Images.ImageClient;
 
@@ -30,6 +30,10 @@ internal sealed class OpenAiClient : IOpenAiClient
 
         var imageSdkClient = new ImageClient(opt.DefaultImageModel, opt.ApiKey);
         Images = new Impl.ImageClient(imageSdkClient, pipeline, loggerFactory.CreateLogger<Impl.ImageClient>());
+
+        var responsesClient = new ResponsesClient(opt.ApiKey);
+        ResponseImageClient = new ResponseImageClient(gptModel: opt.DefaultModel, gptImageModel: opt.DefaultImageModel,
+            responsesClient, pipeline, loggerFactory.CreateLogger<ResponseImageClient>());
     }
 
     /// <inheritdoc />
@@ -40,6 +44,9 @@ internal sealed class OpenAiClient : IOpenAiClient
 
     /// <inheritdoc />
     public IImageClient Images { get; }
+
+    /// <inheritdoc />
+    public IResponseImageClient ResponseImageClient { get; }
 
     /// <inheritdoc />
     public ValueTask DisposeAsync()

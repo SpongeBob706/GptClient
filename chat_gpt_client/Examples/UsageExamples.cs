@@ -263,7 +263,7 @@ public static class UsageExamples
 
             Console.WriteLine("Редактирование изображения...");
 
-            var editedImageUrl = await gptService.EditImageAsync(
+            var editedImageUrl = await gptService.EditImageWithAnalyseAsync(
                 imageBytes: imageBytes,
                 editPrompt: "Сделай кота рыжим и добавь ему солнечные очки");
 

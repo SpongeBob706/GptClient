@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using GptClient.Models;
 using OpenAI.Chat;
+using OpenAI.Images;
 
 namespace GptClient.Services;
 
@@ -52,6 +54,18 @@ public interface IGptService : IAsyncDisposable
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Продолжить диалог с историей сообщений и получить полный ответ с возможными изображениями
+    /// </summary>
+    /// <param name="messages">История сообщений</param>
+    /// <param name="responseFormat">Формат ответа</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Полный ответ ассистента, включая текст и изображения</returns>
+    Task<ChatCompletion> ContinueDialogueWithImagesAsync(
+        IEnumerable<ChatMessage> messages,
+        ChatResponseFormat? responseFormat = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Сгенерировать текст потоково
     /// </summary>
     /// <param name="prompt">Текстовый запрос</param>
@@ -71,9 +85,25 @@ public interface IGptService : IAsyncDisposable
     /// <param name="editPrompt">Промпт с описанием желаемых изменений</param>
     /// <param name="cancellationToken">Токен отмены</param>
     /// <returns>URL сгенерированного изображения</returns>
-    Task<byte[]> EditImageAsync(
+    Task<byte[]> EditImageWithAnalyseAsync(
         byte[] imageBytes,
         string editPrompt,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Отредактировать существующее изображение через Image Edit API.
+    /// Исходное изображение сохраняется максимально близким к оригиналу,
+    /// изменяются только указанные элементы.
+    /// </summary>
+    /// <param name="imageBytes">Исходное изображение</param>
+    /// <param name="editPrompt">Инструкция по изменению</param>
+    /// <param name="cancellationToken">Токен отмены</param>
+    /// <returns>Изменённое изображение</returns>
+    Task<byte[]> EditImageDirectAsync(
+        byte[] imageBytes,
+        string editPrompt,
+        GeneratedImageQuality? quality = null,
+        GeneratedImageSize? size = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -86,6 +116,22 @@ public interface IGptService : IAsyncDisposable
     Task<byte[]> EditImageFromUrlAsync(
         Uri imageUrl,
         string editPrompt,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Выполнить запрос через Responses API.
+    /// </summary>
+    Task<ResponseExecutionResult> ExecuteResponseAsync(
+        ResponseRequest request,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Продолжить мультимодальный диалог.
+    /// </summary>
+    Task<ResponseExecutionResult> ContinueResponseAsync(
+        string sessionId,
+        string prompt,
+        IReadOnlyCollection<ResponseImage>? images = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

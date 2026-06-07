@@ -21,4 +21,9 @@ public interface IOpenAiClient : IAsyncDisposable
     /// Клиент для генерации изображений
     /// </summary>
     IImageClient Images { get; }
+
+    /// <summary>
+    /// Клиент респонсов
+    /// </summary>
+    IResponseImageClient ResponseImageClient { get; }
 }

@@ -6,12 +6,12 @@ using OpenAI.Chat;
 namespace GptClient.Client;
 
 /// <summary>
-/// Клиент для работы с текстовыми запросами ChatGPT
+/// Клиент для работы с Chat API
 /// </summary>
 public interface IChatClient
 {
     /// <summary>
-    /// Выполнить chat completion запрос
+    /// Выполняет синхронный запрос к chat API
     /// </summary>
     Task<ChatCompletion> CompleteAsync(
         IEnumerable<ChatMessage> messages,
@@ -19,7 +19,7 @@ public interface IChatClient
         CancellationToken cancellationToken);
 
     /// <summary>
-    /// Выполнить streaming chat completion запрос
+    /// Выполняет потоковый запрос к chat API
     /// </summary>
     IAsyncEnumerable<StreamingChatCompletionUpdate> StreamAsync(
         IEnumerable<ChatMessage> messages,
