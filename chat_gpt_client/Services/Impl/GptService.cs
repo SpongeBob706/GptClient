@@ -79,7 +79,7 @@ internal sealed class GptService : IGptService
     public async Task<ResponseExecutionResult> ContinueResponseAsync(
         string sessionId,
         string prompt,
-        IReadOnlyCollection<ResponseImage>? images = null,
+        IReadOnlyCollection<(ResponseImage, string?)>? images = null,
         CancellationToken cancellationToken = default)
     {
         ValidateInput(prompt);
@@ -90,7 +90,7 @@ internal sealed class GptService : IGptService
                 SessionId = sessionId,
                 Prompt = prompt,
                 ContinueConversation = true,
-                Images = images ?? Array.Empty<ResponseImage>()
+                Images = images ?? Array.Empty<(ResponseImage, string?)>()
             },
             cancellationToken);
     }

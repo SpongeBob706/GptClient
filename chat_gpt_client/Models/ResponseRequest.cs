@@ -27,7 +27,7 @@ public sealed class ResponseRequest
     /// <summary>
     /// Изображения.
     /// </summary>
-    public IReadOnlyCollection<ResponseImage> Images { get; init; } = Array.Empty<ResponseImage>();
+    public IReadOnlyCollection<(ResponseImage? Image, string? Prompt)> Images { get; init; } = Array.Empty<(ResponseImage? Image, string? Prompt)>();
 
     public ImageGenerationToolQuality? Quality { get; init; }
     public ImageGenerationToolSize? Size { get; init; }

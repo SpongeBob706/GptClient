@@ -131,7 +131,7 @@ public interface IGptService : IAsyncDisposable
     Task<ResponseExecutionResult> ContinueResponseAsync(
         string sessionId,
         string prompt,
-        IReadOnlyCollection<ResponseImage>? images = null,
+        IReadOnlyCollection<(ResponseImage, string?)>? images = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

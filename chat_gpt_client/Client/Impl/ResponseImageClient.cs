@@ -74,18 +74,23 @@ internal sealed class ResponseImageClient : IResponseImageClient
                 };
 
                 // Добавляем входные данные
-                foreach (var image in request.Images)
+                foreach (var (image, prompt) in request.Images)
                 {
-                    options.InputItems.Add(
-                        ResponseItem.CreateUserMessageItem(
-                            new List<ResponseContentPart>
-                            {
-                                ResponseContentPart.CreateInputImagePart(
-                                    BinaryData.FromBytes(image.Data, image.MimeType),
-                                    null),
+                    var content = new List<ResponseContentPart>();
 
-                                ResponseContentPart.CreateInputTextPart(request.Prompt)
-                            }));
+                    if (image != null)
+                    {
+                        content.Add(ResponseContentPart.CreateInputImagePart(
+                            BinaryData.FromBytes(image.Data, image.MimeType),
+                            null));
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(prompt))
+                    {
+                        content.Add(ResponseContentPart.CreateInputTextPart(prompt));
+                    }
+
+                    options.InputItems.Add(ResponseItem.CreateUserMessageItem(content));
                 }
 
                 var result = await _client.CreateResponseAsync(options, ct);
@@ -134,28 +139,6 @@ internal sealed class ResponseImageClient : IResponseImageClient
                 return result != null && result.Value.Deleted;
             },
             cancellationToken);
-    }
-
-    private static List<ResponseItem> BuildInputItems(
-        ResponseRequest request)
-    {
-        var content = new List<ResponseContentPart>();
-
-        foreach (var image in request.Images)
-        {
-            content.Add(
-                ResponseContentPart.CreateInputImagePart(
-                    BinaryData.FromBytes(image.Data, image.MimeType),
-                    ResponseImageDetailLevel.Low)
-            );
-        }
-
-        content.Add(ResponseContentPart.CreateInputTextPart(request.Prompt));
-
-        return
-        [
-            ResponseItem.CreateUserMessageItem(content)
-        ];
     }
 
     private ResponseExecutionResult ParseResponse(
